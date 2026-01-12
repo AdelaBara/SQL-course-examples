@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "request": "Classify clients based on their total spending.",
+    "sql": "SELECT cl.id_client, cl.nume_client, SUM(rc.pret * rc.cantitate) AS total_cheltuit, CASE WHEN SUM(rc.pret * rc.cantitate) < 500 THEN 'Mic' WHEN SUM(rc.pret * rc.cantitate) BETWEEN 500 AND 2000 THEN 'Mediu' ELSE 'VIP' END AS categorie_client FROM clienti cl JOIN comenzi c ON cl.id_client = c.id_client JOIN rand_comenzi rc ON c.id_comanda = rc.id_comanda GROUP BY cl.id_client, cl.nume_client"
+  },
+  {
+    "id": 2,
+    "request": "List employees who earn more than the average salary in their department.",
+    "sql": "SELECT a.id_angajat, a.nume, a.salariul, d.denumire_departament FROM angajati a JOIN departamente d ON a.id_departament = d.id_departament WHERE a.salariul > ( SELECT AVG(salariul) FROM angajati WHERE id_departament = a.id_departament )"
+  },
+  {
+    "id": 3,
+    "request": "Show products that are more expensive than the average price in their category.",
+    "sql": "SELECT p.denumire_produs, p.categorie, p.pret_lista FROM produse p WHERE p.pret_lista > ( SELECT AVG(p2.pret_lista) FROM produse p2 WHERE p2.categorie = p.categorie )"
+  },
+  {
+    "id": 4,
+    "request": "Find the department with the highest total payroll.",
+    "sql": "SELECT d.denumire_departament, SUM(a.salariul) AS fond_salarial FROM departamente d JOIN angajati a ON d.id_departament = a.id_departament GROUP BY d.denumire_departament HAVING SUM(a.salariul) = ( SELECT MAX(SUM(a2.salariul)) FROM angajati a2 GROUP BY a2.id_departament )"
+  },
+  {
+    "id": 5,
+    "request": "Rank employees by salary inside each department.",
+    "sql": "SELECT a.id_angajat, a.nume, a.id_departament, a.salariul, ( SELECT COUNT(*) FROM angajati a2 WHERE a2.id_departament = a.id_departament AND a2.salariul > a.salariul ) + 1 AS pozitie_in_departament FROM angajati a"
+  },
+  {
+    "id": 6,
+    "request": "Find clients whose average order value is above the overall average.",
+    "sql": "SELECT cl.id_client, cl.nume_client, AVG(rc.pret * rc.cantitate) AS valoare_medie_comanda FROM clienti cl JOIN comenzi c ON cl.id_client = c.id_client JOIN rand_comenzi rc ON c.id_comanda = rc.id_comanda GROUP BY cl.id_client, cl.nume_client HAVING AVG(rc.pret * rc.cantitate) > ( SELECT AVG(rc2.pret * rc2.cantitate) FROM rand_comenzi rc2 )"
+  },
+  {
+    "id": 7,
+    "request": "Categorize products based on total sold quantity.",
+    "sql": "SELECT p.denumire_produs, SUM(rc.cantitate) AS total_vandut, CASE WHEN SUM(rc.cantitate) > 100 THEN 'Foarte cautat' WHEN SUM(rc.cantitate) BETWEEN 30 AND 100 THEN 'Popular' ELSE 'Rar' END AS categorie_cerere FROM produse p JOIN rand_comenzi rc ON p.id_produs = rc.id_produs GROUP BY p.denumire_produs"
+  },
+  {
+    "id": 8,
+    "request": "List managers who manage more departments than the average manager.",
+    "sql": "SELECT a.id_angajat, a.nume FROM angajati a WHERE a.id_angajat IN ( SELECT d.id_manager FROM departamente d GROUP BY d.id_manager HAVING COUNT(*) > ( SELECT AVG(cnt) FROM ( SELECT COUNT(*) AS cnt FROM departamente GROUP BY id_manager ) ) )"
+  },
+  {
+    "id": 9,
+    "request": "Find the top-spending client.",
+    "sql": "SELECT cl.nume_client, SUM(rc.pret * rc.cantitate) AS total_cheltuit FROM clienti cl JOIN comenzi c ON cl.id_client = c.id_client JOIN rand_comenzi rc ON c.id_comanda = rc.id_comanda group by cl.nume_client HAVING SUM(rc.pret *rc.cantitate) = (SELECT MAX(SUM(rc2.pret * rc2.cantitate)) FROM clienti cl2 JOIN comenzi c2 ON cl2.id_client = c2.id_client JOIN rand_comenzi rc2 ON c2.id_comanda =rc2.id_comanda  group by cl2.nume_client)"
+  },
+  {
+    "id": 10,
+    "request": "List employees whose salary is above their department average.",
+    "sql": "SELECT a.id_angajat, a.nume, a.salariul, d.denumire_departament FROM angajati a JOIN departamente d ON a.id_departament = d.id_departament WHERE a.salariul > ( SELECT AVG(salariul) FROM angajati WHERE id_departament = a.id_departament )"
+  }
+]

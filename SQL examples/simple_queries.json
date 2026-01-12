@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "request": "List all product names in uppercase.",
+    "sql": "SELECT UPPER(denumire_produs) AS produs FROM produse"
+  },
+  {
+    "id": 2,
+    "request": "Display full names of all clients.",
+    "sql": "SELECT prenume_client || ' ' || nume_client AS nume_complet FROM clienti"
+  },
+  {
+    "id": 3,
+    "request": "Find clients born in the current year.",
+    "sql": "SELECT * FROM clienti WHERE EXTRACT(YEAR FROM data_nastere) = EXTRACT(YEAR FROM SYSDATE)"
+  },
+  {
+    "id": 4,
+    "request": "List employees hired in the last two years.",
+    "sql": "SELECT nume, prenume, data_angajare FROM angajati WHERE data_angajare >= ADD_MONTHS(SYSDATE, -24)"
+  },
+  {
+    "id": 5,
+    "request": "Show length of each product description.",
+    "sql": "SELECT denumire_produs, LENGTH(descriere) AS lungime_descriere FROM produse"
+  },
+  {
+    "id": 6,
+    "request": "Display all orders with client names.",
+    "sql": "SELECT c.id_comanda, cl.nume_client, cl.prenume_client FROM comenzi c JOIN clienti cl ON c.id_client = cl.id_client"
+  },
+  {
+    "id": 7,
+    "request": "Show employees and their departments.",
+    "sql": "SELECT a.nume, a.prenume, d.denumire_departament FROM angajati a JOIN departamente d ON a.id_departament = d.id_departament"
+  },
+  {
+    "id": 8,
+    "request": "List products included in each order.",
+    "sql": "SELECT rc.id_comanda, p.denumire_produs, rc.cantitate FROM rand_comenzi rc JOIN produse p ON rc.id_produs = p.id_produs"
+  },
+  {
+    "id": 9,
+    "request": "Display complete order details with client and product information.",
+    "sql": "SELECT c.id_comanda, cl.nume_client, p.denumire_produs, rc.cantitate FROM comenzi c JOIN clienti cl ON c.id_client = cl.id_client JOIN rand_comenzi rc ON c.id_comanda = rc.id_comanda JOIN produse p ON rc.id_produs = p.id_produs"
+  },
+  {
+    "id": 10,
+    "request": "Show each employee with their function and department.",
+    "sql": "SELECT a.nume, f.denumire_functie, d.denumire_departament FROM angajati a JOIN functii f ON a.id_functie = f.id_functie JOIN departamente d ON a.id_departament = d.id_departament"
+  },
+  {
+    "id": 11,
+    "request": "Display client names with their total orders' value.",
+    "sql": "SELECT cl.nume_client, sum(rc.pret*rc.cantitate) AS total_comanda FROM clienti cl, comenzi c, rand_comenzi rc WHERE cl.id_client = c.id_client AND c.id_comanda = rc.id_comanda GROUP BY cl.nume_client"
+  },
+  {
+    "id": 12,
+    "request": "Calculate total value of each order.",
+    "sql": "SELECT rc.id_comanda, SUM(rc.pret * rc.cantitate) AS total_comanda FROM rand_comenzi rc GROUP BY rc.id_comanda"
+  },
+  {
+    "id": 13,
+    "request": "Count number of employees in each department.",
+    "sql": "SELECT d.denumire_departament, COUNT(*) AS nr_angajati FROM angajati a JOIN departamente d ON a.id_departament = d.id_departament GROUP BY d.denumire_departament"
+  },
+  {
+    "id": 14,
+    "request": "Calculate average product price for each category.",
+    "sql": "SELECT categorie, AVG(pret_lista) AS pret_mediu FROM produse GROUP BY categorie"
+  },
+  {
+    "id": 15,
+    "request": "List departments with more than three employees.",
+    "sql": "SELECT d.denumire_departament, COUNT(*) AS nr_angajati FROM angajati a JOIN departamente d ON a.id_departament = d.id_departament GROUP BY d.denumire_departament HAVING COUNT(*) > 3"
+  },
+  {
+    "id": 16,
+    "request": "Classify employees based on salary level.",
+    "sql": "SELECT nume, prenume, CASE WHEN salariul < 3000 THEN 'Mic' WHEN salariul BETWEEN 3000 AND 7000 THEN 'Mediu' ELSE 'Mare' END AS nivel_salariu FROM angajati"
+  },
+  {
+    "id": 17,
+    "request": "Display order status as descriptive text.",
+    "sql": "SELECT id_comanda, CASE stare_comanda WHEN 0 THEN 'Noua' WHEN 1 THEN 'Procesata' WHEN 2 THEN 'Livrata' ELSE 'Necunoscuta' END AS status FROM comenzi"
+  },
+  {
+    "id": 18,
+    "request": "Categorize products based on their price level.",
+    "sql": "SELECT denumire_produs, CASE WHEN pret_lista < 50 THEN 'Ieftin' WHEN pret_lista < 200 THEN 'Mediu' ELSE 'Premium' END AS categorie_pret FROM produse"
+  },
+  {
+    "id": 19,
+    "request": "Calculate total spending for each client.",
+    "sql": "SELECT cl.nume_client, cl.limita_credit-SUM(rc.pret * rc.cantitate) AS total_cheltuit FROM clienti cl JOIN comenzi c ON cl.id_client = c.id_client JOIN rand_comenzi rc ON c.id_comanda = rc.id_comanda GROUP BY cl.nume_client, cl.limita_credit"
+  },
+  {
+    "id": 20,
+    "request": "Find the top three best-selling products by quantity.",
+    "sql": "SELECT p.denumire_produs, SUM(rc.cantitate) AS total_vandut FROM rand_comenzi rc JOIN produse p ON rc.id_produs = p.id_produs GROUP BY p.denumire_produs ORDER BY total_vandut DESC FETCH FIRST 3 ROWS ONLY"
+  }
+]
