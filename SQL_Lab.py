@@ -1,5 +1,4 @@
 import json
-import textwrap
 from pathlib import Path
 
 import pandas as pd
@@ -10,8 +9,7 @@ from backend.session_utils import get_oracle_connection
 
 ROOT = Path(__file__).resolve().parent
 SQL_DIR = ROOT / "SQL examples"
-SIMPLE_PATH = SQL_DIR / "simple_queries.json"
-COMPLEX_PATH = SQL_DIR / "complex queries.json"
+INTERPRETED_PATH = SQL_DIR / "complex_queries_interpreted.json"
 
 
 def load_queries(path: Path):
@@ -34,75 +32,165 @@ def run_query(sql_text: str, connection):
     return None
 
 
-def format_sql_for_display(sql_text: str, width: int = 88) -> str:
-    cleaned = " ".join(sql_text.strip().split())
-    return "\n".join(
-        textwrap.wrap(
-            cleaned,
-            width=width,
-            break_long_words=False,
-            break_on_hyphens=False,
-        )
-    )
-
-
 st.set_page_config(page_title="SQL Lab", layout="wide")
-st.title("SQL Lab")
-st.caption("Run prepared SQL examples on the Oracle schema.")
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+    :root {
+        --bg-1: #0b1220;
+        --bg-2: #0f1b2d;
+        --card: #121a2b;
+        --accent: #f8d56a;
+        --accent-2: #7cd4ff;
+        --text: #ffffff;
+        --muted: #b7c0cc;
+    }
+
+    .stApp {
+        background: radial-gradient(1200px 600px at 10% 0%, #15253a 0%, transparent 60%),
+                    radial-gradient(900px 500px at 90% 10%, #1a2a40 0%, transparent 55%),
+                    linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+        color: var(--text);
+        font-family: "Space Grotesk", sans-serif;
+    }
+
+    .hero {
+        padding: 24px 28px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(248, 213, 106, 0.15), rgba(124, 212, 255, 0.1));
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 18px;
+    }
+
+    .hero-title {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        letter-spacing: 0.3px;
+    }
+
+    .hero-subtitle {
+        color: var(--muted);
+        font-size: 16px;
+    }
+
+    .chip {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(124, 212, 255, 0.18);
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        margin-right: 8px;
+    }
+
+    .panel {
+        padding: 16px 18px;
+        border-radius: 16px;
+        background: var(--card);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel h3 {
+        margin-bottom: 8px;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .stTextArea textarea {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 14px;
+        background: #0f1626;
+        color: #ffffff;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .stSelectbox, .stButton button {
+        font-family: "Space Grotesk", sans-serif;
+    }
+
+    .stSelectbox label {
+        color: var(--text);
+    }
+
+    .stTextArea label {
+        color: var(--text);
+    }
+
+    .stButton button {
+        background: linear-gradient(90deg, var(--accent), #ffd88f);
+        color: #2c2007;
+        border-radius: 999px;
+        border: none;
+        font-weight: 700;
+    }
+
+    .stButton button:hover {
+        filter: brightness(1.05);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+st.markdown(
+    """
+    <div class="hero">
+        <span class="chip">SQL Lab</span>
+        <span class="chip">Oracle</span>
+        <div class="hero-title">SQL query playground for students</div>
+        <div class="hero-subtitle">Pick a challenge, read the explanation, tweak the SQL, and see results instantly.</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 connection = get_oracle_connection()
 
 with st.expander("Schema image", expanded=False):
     schema_path = SQL_DIR / "schemaBD.png"
     if schema_path.exists():
-        st.image(str(schema_path), caption="Schema overview", use_column_width=True)
+        st.image(str(schema_path), caption="Schema overview", use_container_width=True)
     else:
         st.info("Schema image not found.")
 
-query_sets = {
-    "Simple examples": SIMPLE_PATH,
-    "Complex examples": COMPLEX_PATH,
-}
-selected_set = st.selectbox("Choose query set", list(query_sets.keys()))
-queries = load_queries(query_sets[selected_set])
+st.markdown("""-----""")
+queries = load_queries(INTERPRETED_PATH)
+categories = sorted({q["category"] for q in queries})
+category_filter = st.selectbox("Choose SQL category", ["All"] + categories)
+if category_filter != "All":
+    queries = [q for q in queries if q["category"] == category_filter]
 st.subheader("Examples")
-st.dataframe(pd.DataFrame(queries)[["id", "request"]], hide_index=True   )
-left, right = st.columns(2)
+selected_id = st.selectbox(
+    "Pick an example to run",
+    [q["id"] for q in queries],
+    format_func=lambda qid: f"#{qid}: {next(q['request'] for q in queries if q['id'] == qid)}",
+)
+selected_query = next(q for q in queries if q["id"] == selected_id)
 
-with left:
-    st.subheader("Examples")
-    selected_id = st.selectbox(
-        "Pick an example to run",
-        [q["id"] for q in queries],
-        format_func=lambda qid: f"#{qid}: {next(q['request'] for q in queries if q['id'] == qid)}",
-    )
-    selected_query = next(q for q in queries if q["id"] == selected_id)
-    st.code(format_sql_for_display(selected_query["sql"]), language="sql", height=200)
-    run_example = st.button("Run selected example", type="primary")
+if st.session_state.get("selected_id") != selected_id:
+    st.session_state["selected_id"] = selected_id
+    st.session_state["editor_sql"] = selected_query["sql"]
 
-with right:
-    st.subheader("Ad-hoc SQL")
-    adhoc_sql = st.text_area(
-        "Write your SQL",
-        value="SELECT * FROM clienti",
-        height=200,
-    )
-    run_adhoc = st.button("Run ad-hoc SQL")
+st.markdown("### Explanation:")
+st.markdown(selected_query.get("explanation", ""))
+sql_text = st.text_area(
+    "SQL to run",
+    value=st.session_state.get("editor_sql", ""),
+    height=200,
+)
+st.session_state["editor_sql"] = sql_text
+run_example = st.button("Run SQL", type="primary")
 
 if run_example:
     try:
-        result = run_query(selected_query["sql"], connection)
-        if result is None:
-            st.success("Statement executed.")
-        else:
-            st.success(f"Returned {len(result)} rows.")
-            st.dataframe(result, use_container_width=True)
-    except Exception as exc:
-        st.error(f"Query failed: {exc}")
-
-if run_adhoc:
-    try:
-        result = run_query(adhoc_sql, connection)
+        result = run_query(sql_text, connection)
         if result is None:
             st.success("Statement executed.")
         else:

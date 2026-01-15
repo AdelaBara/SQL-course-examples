@@ -1,0 +1,296 @@
+[
+    {
+        "id": 1,
+        "category": "Functions",
+        "request": "List all product names in uppercase.",
+        "sql": "SELECT UPPER(denumire_produs) AS produs FROM produse",
+        "explanation": "SELECT uses the UPPER function to transform product names into uppercase. FROM specifies the products table."
+    },
+    {
+        "id": 2,
+        "category": "Functions",
+        "request": "Display full names of all clients.",
+        "sql": "SELECT prenume_client || ' ' || nume_client AS nume_complet FROM clienti",
+        "explanation": "SELECT concatenates first name and last name using the string operator. FROM reads data from the clients table."
+    },
+    {
+        "id": 3,
+        "category": "Functions",
+        "request": "Find clients born in the current year.",
+        "sql": "SELECT * FROM clienti WHERE EXTRACT(YEAR FROM data_nastere) = EXTRACT(YEAR FROM SYSDATE)",
+        "explanation": "WHERE filters rows by comparing the birth year with the current year using EXTRACT."
+    },
+    {
+        "id": 4,
+        "category": "Functions",
+        "request": "List employees hired in the last two years.",
+        "sql": "SELECT nume, prenume, data_angajare FROM angajati WHERE data_angajare >= ADD_MONTHS(SYSDATE, -24)",
+        "explanation": "WHERE keeps employees whose hire date is within the last 24 months using ADD_MONTHS."
+    },
+    {
+        "id": 5,
+        "category": "Functions",
+        "request": "Show length of each product description.",
+        "sql": "SELECT denumire_produs, LENGTH(descriere) AS lungime_descriere FROM produse",
+        "explanation": "SELECT uses LENGTH to calculate the number of characters in each product description."
+    },
+    {
+        "id": 6,
+        "category": "JOIN",
+        "request": "Display all orders with client names.",
+        "sql": "SELECT c.id_comanda, cl.nume_client, cl.prenume_client FROM comenzi c JOIN clienti cl ON c.id_client = cl.id_client",
+        "explanation": "JOIN connects orders with clients using the client id. SELECT returns order id and client name."
+    },
+    {
+        "id": 7,
+        "category": "JOIN",
+        "request": "Show employees and their departments.",
+        "sql": "SELECT a.nume, a.prenume, d.denumire_departament FROM angajati a JOIN departamente d ON a.id_departament = d.id_departament",
+        "explanation": "JOIN matches employees with their departments using the department id."
+    },
+    {
+        "id": 8,
+        "category": "JOIN",
+        "request": "List products included in each order.",
+        "sql": "SELECT rc.id_comanda, p.denumire_produs, rc.cantitate FROM rand_comenzi rc JOIN produse p ON rc.id_produs = p.id_produs",
+        "explanation": "JOIN links order rows with products so that each order line shows the product name."
+    },
+    {
+        "id": 9,
+        "category": "JOIN",
+        "request": "Display complete order details with client and product information.",
+        "sql": "SELECT c.id_comanda, cl.nume_client, p.denumire_produs, rc.cantitate FROM comenzi c JOIN clienti cl ON c.id_client = cl.id_client JOIN rand_comenzi rc ON c.id_comanda = rc.id_comanda JOIN produse p ON rc.id_produs = p.id_produs",
+        "explanation": "Multiple JOINs combine orders, clients, order lines, and products into a single result set."
+    },
+    {
+        "id": 10,
+        "category": "JOIN",
+        "request": "Show each employee with their function and department.",
+        "sql": "SELECT a.nume, f.denumire_functie, d.denumire_departament FROM angajati a JOIN functii f ON a.id_functie = f.id_functie JOIN departamente d ON a.id_departament = d.id_departament",
+        "explanation": "JOIN connects employees to their functions and departments."
+    },
+    {
+        "id": 11,
+        "category": "Aggregations",
+        "request": "Display client names with their total orders' value.",
+        "sql": "SELECT cl.nume_client, SUM(rc.pret*rc.cantitate) AS total_comanda FROM clienti cl, comenzi c, rand_comenzi rc WHERE cl.id_client = c.id_client AND c.id_comanda = rc.id_comanda GROUP BY cl.nume_client",
+        "explanation": "FROM combines three tables. WHERE defines join conditions. GROUP BY groups results per client. SUM calculates total order value."
+    },
+    {
+        "id": 12,
+        "category": "Aggregations",
+        "request": "Calculate total value of each order.",
+        "sql": "SELECT rc.id_comanda, SUM(rc.pret * rc.cantitate) AS total_comanda FROM rand_comenzi rc GROUP BY rc.id_comanda",
+        "explanation": "GROUP BY groups order rows per order. SUM computes total value per order."
+    },
+    {
+        "id": 13,
+        "category": "Aggregations",
+        "request": "Count number of employees in each department.",
+        "sql": "SELECT d.denumire_departament, COUNT(*) AS nr_angajati FROM angajati a JOIN departamente d ON a.id_departament = d.id_departament GROUP BY d.denumire_departament",
+        "explanation": "JOIN links employees and departments. GROUP BY groups by department name. COUNT counts employees."
+    },
+    {
+        "id": 14,
+        "category": "Aggregations",
+        "request": "Calculate average product price for each category.",
+        "sql": "SELECT categorie, AVG(pret_lista) AS pret_mediu FROM produse GROUP BY categorie",
+        "explanation": "GROUP BY groups products by category. AVG computes average price per category."
+    },
+    {
+        "id": 15,
+        "category": "Aggregations",
+        "request": "List departments with more than three employees.",
+        "sql": "SELECT d.denumire_departament, COUNT(*) AS nr_angajati FROM angajati a JOIN departamente d ON a.id_departament = d.id_departament GROUP BY d.denumire_departament HAVING COUNT(*) > 3",
+        "explanation": "GROUP BY Aggregations employees per department. HAVING filters groups with more than three employees."
+    },
+    {
+        "id": 16,
+        "category": "CASE Expression",
+        "request": "Classify employees based on salary level.",
+        "sql": "SELECT nume, prenume, CASE WHEN salariul < 3000 THEN 'Mic' WHEN salariul BETWEEN 3000 AND 7000 THEN 'Mediu' ELSE 'Mare' END AS nivel_salariu FROM angajati",
+        "explanation": "CASE creates a classification based on salary values."
+    },
+    {
+        "id": 17,
+        "category": "CASE Expression",
+        "request": "Display order status as descriptive text.",
+        "sql": "SELECT id_comanda, CASE stare_comanda WHEN 0 THEN 'Noua' WHEN 1 THEN 'Procesata' WHEN 2 THEN 'Livrata' ELSE 'Necunoscuta' END AS status FROM comenzi",
+        "explanation": "CASE converts numeric order status into readable text."
+    },
+    {
+        "id": 18,
+        "category": "CASE Expression",
+        "request": "Categorize products based on their price level.",
+        "sql": "SELECT denumire_produs, CASE WHEN pret_lista < 50 THEN 'Ieftin' WHEN pret_lista < 200 THEN 'Mediu' ELSE 'Premium' END AS categorie_pret FROM produse",
+        "explanation": "CASE assigns price categories based on price thresholds."
+    },
+    {
+        "id": 19,
+        "category": "Aggregations",
+        "request": "Calculate total spending for each client.",
+        "sql": "SELECT cl.nume_client, cl.limita_credit-SUM(rc.pret * rc.cantitate) AS total_cheltuit FROM clienti cl JOIN comenzi c ON cl.id_client = c.id_client JOIN rand_comenzi rc ON c.id_comanda = rc.id_comanda GROUP BY cl.nume_client, cl.limita_credit",
+        "explanation": "JOIN connects clients, orders, and order lines. GROUP BY Aggregations per client. Arithmetic computes remaining credit."
+    },
+    {
+        "id": 20,
+        "category": "Aggregations",
+        "request": "Find the top three best-selling products by quantity.",
+        "sql": "SELECT p.denumire_produs, SUM(rc.cantitate) AS total_vandut FROM rand_comenzi rc JOIN produse p ON rc.id_produs = p.id_produs GROUP BY p.denumire_produs ORDER BY total_vandut DESC FETCH FIRST 3 ROWS ONLY",
+        "explanation": "GROUP BY Aggregations sales per product. ORDER BY sorts descending. FETCH limits results to the top three."
+    },
+    {
+    "id": 21,
+    "category": "Aggregations",
+    "request": "Classify clients based on their total spending.",
+    "sql": "SELECT cl.id_client, cl.nume_client, SUM(rc.pret * rc.cantitate) AS total_cheltuit, CASE WHEN SUM(rc.pret * rc.cantitate) < 500 THEN 'Mic' WHEN SUM(rc.pret * rc.cantitate) BETWEEN 500 AND 2000 THEN 'Mediu' ELSE 'VIP' END AS categorie_client FROM clienti cl JOIN comenzi c ON cl.id_client = c.id_client JOIN rand_comenzi rc ON c.id_comanda = rc.id_comanda GROUP BY cl.id_client, cl.nume_client",
+    "explanation": "JOIN connects clients, orders, and order rows. GROUP BY Aggregations per client. SUM computes total spending. CASE converts the aggregate into a spending category."
+  },
+  {
+    "id": 22,
+    "category": "Subquery",
+    "request": "List employees who earn more than the average salary in their department.",
+    "sql": "SELECT a.id_angajat, a.nume, a.salariul, d.denumire_departament FROM angajati a JOIN departamente d ON a.id_departament = d.id_departament WHERE a.salariul > ( SELECT AVG(salariul) FROM angajati WHERE id_departament = a.id_departament )",
+    "explanation": "The main query joins employees and departments. WHERE compares salary to a correlated subquery that computes department average."
+  },
+  {
+    "id": 23,
+    "category": "Subquery",
+    "request": "Show products that are more expensive than the average price in their category.",
+    "sql": "SELECT p.denumire_produs, p.categorie, p.pret_lista FROM produse p WHERE p.pret_lista > ( SELECT AVG(p2.pret_lista) FROM produse p2 WHERE p2.categorie = p.categorie )",
+    "explanation": "FROM selects products. WHERE filters those whose price exceeds the category average computed in the correlated subquery."
+  },
+  {
+    "id": 24,
+    "category": "Aggregations",
+    "request": "Find the department with the highest total payroll.",
+    "sql": "SELECT d.denumire_departament, SUM(a.salariul) AS fond_salarial FROM departamente d JOIN angajati a ON d.id_departament = a.id_departament GROUP BY d.denumire_departament HAVING SUM(a.salariul) = ( SELECT MAX(SUM(a2.salariul)) FROM angajati a2 GROUP BY a2.id_departament )",
+    "explanation": "JOIN links departments and employees. GROUP BY Aggregations salaries per department. HAVING keeps only the maximum payroll using a nested aggregate subquery."
+  },
+  {
+    "id": 25,
+    "category": "Subquery",
+    "request": "Rank employees by salary inside each department.",
+    "sql": "SELECT a.id_angajat, a.nume, a.id_departament, a.salariul, ( SELECT COUNT(*) FROM angajati a2 WHERE a2.id_departament = a.id_departament AND a2.salariul > a.salariul ) + 1 AS pozitie_in_departament FROM angajati a",
+    "explanation": "For each employee, the correlated subquery counts higher-paid colleagues in the same department. Adding 1 produces the rank."
+  },
+  {
+    "id": 26,
+    "category": "Aggregations",
+    "request": "Find clients whose average order value is above the overall average.",
+    "sql": "SELECT cl.id_client, cl.nume_client, AVG(rc.pret * rc.cantitate) AS valoare_medie_comanda FROM clienti cl JOIN comenzi c ON cl.id_client = c.id_client JOIN rand_comenzi rc ON c.id_comanda = rc.id_comanda GROUP BY cl.id_client, cl.nume_client HAVING AVG(rc.pret * rc.cantitate) > ( SELECT AVG(rc2.pret * rc2.cantitate) FROM rand_comenzi rc2 )",
+    "explanation": "JOIN builds client-order data. GROUP BY Aggregations per client. HAVING filters by comparing with the global average computed in the subquery."
+  },
+  {
+    "id": 27,
+    "category": "Aggregations",
+    "request": "Categorize products based on total sold quantity.",
+    "sql": "SELECT p.denumire_produs, SUM(rc.cantitate) AS total_vandut, CASE WHEN SUM(rc.cantitate) > 100 THEN 'Foarte cautat' WHEN SUM(rc.cantitate) BETWEEN 30 AND 100 THEN 'Popular' ELSE 'Rar' END AS categorie_cerere FROM produse p JOIN rand_comenzi rc ON p.id_produs = rc.id_produs GROUP BY p.denumire_produs",
+    "explanation": "JOIN connects products with sales rows. GROUP BY Aggregations quantity. CASE classifies demand based on the aggregate."
+  },
+  {
+    "id": 28,
+    "category": "Aggregations",
+    "request": "List managers who manage more departments than the average manager.",
+    "sql": "SELECT a.id_angajat, a.nume FROM angajati a WHERE a.id_angajat IN ( SELECT d.id_manager FROM departamente d GROUP BY d.id_manager HAVING COUNT(*) > ( SELECT AVG(cnt) FROM ( SELECT COUNT(*) AS cnt FROM departamente GROUP BY id_manager ) ) )",
+    "explanation": "Subqueries compute departments per manager and the global average. HAVING filters managers exceeding that average."
+  },
+  {
+    "id": 29,
+    "category": "Aggregations",
+    "request": "Find the top-spending client.",
+    "sql": "SELECT cl.nume_client, SUM(rc.pret * rc.cantitate) AS total_cheltuit FROM clienti cl JOIN comenzi c ON cl.id_client = c.id_client JOIN rand_comenzi rc ON c.id_comanda = rc.id_comanda GROUP BY cl.nume_client HAVING SUM(rc.pret * rc.cantitate) = (SELECT MAX(SUM(rc2.pret * rc2.cantitate)) FROM clienti cl2 JOIN comenzi c2 ON cl2.id_client = c2.id_client JOIN rand_comenzi rc2 ON c2.id_comanda = rc2.id_comanda GROUP BY cl2.nume_client)",
+    "explanation": "GROUP BY Aggregations per client. HAVING selects the maximum spending using a nested aggregate subquery."
+  },
+  {
+    "id": 30,
+    "category": "Subquery",
+    "request": "List employees whose salary is above their department average.",
+    "sql": "SELECT a.id_angajat, a.nume, a.salariul, d.denumire_departament FROM angajati a JOIN departamente d ON a.id_departament = d.id_departament WHERE a.salariul > ( SELECT AVG(salariul) FROM angajati WHERE id_departament = a.id_departament )",
+    "explanation": "JOIN links employees to departments. WHERE compares each salary with its department average computed by the correlated subquery."
+  },
+  {
+    "id": 31,
+    "category": "Subquery",
+    "request": "Display all employees who work in the same department as the employee named Fay.",
+    "sql": "SELECT * FROM angajati WHERE id_departament = ( SELECT id_departament FROM angajati WHERE LOWER(nume) = 'fay' )",
+    "explanation": "The inner query finds Fay's department. WHERE selects all employees from that department."
+  },
+  {
+    "id": 32,
+    "category": "Subquery",
+    "request": "Show the products whose minimum price is greater than the average list price of all products.",
+    "sql": "SELECT * FROM produse WHERE pret_min > ( SELECT AVG(pret_lista) FROM produse )",
+    "explanation": "WHERE compares each product's minimum price to the global average list price computed in the subquery."
+  },
+  {
+    "id": 33,
+    "category": "Subquery",
+    "request": "Display the employees whose salary is higher than the average salary of their department.",
+    "sql": "SELECT * FROM angajati a WHERE salariul > ( SELECT AVG(salariul) FROM angajati WHERE id_departament = a.id_departament ) ORDER BY id_functie",
+    "explanation": "WHERE filters using a correlated subquery. ORDER BY sorts by job function."
+  },
+  {
+    "id": 34,
+    "category": "Subquery",
+    "request": "Show the products whose price is lower than the average price of the order in which they appear.",
+    "sql": "SELECT p.denumire_produs, rc.id_comanda, rc.pret, rc.cantitate FROM rand_comenzi rc JOIN produse p ON rc.id_produs = p.id_produs WHERE rc.pret < ( SELECT AVG(pret) FROM rand_comenzi WHERE id_comanda = rc.id_comanda ) ORDER BY rc.id_comanda",
+    "explanation": "JOIN links products and order rows. WHERE compares each price with the average price of its own order."
+  },
+  {
+    "id": 35,
+    "category": "Subquery",
+    "request": "Display employees whose salary is equal to the minimum salary in departments 30, 50, and 80.",
+    "sql": "SELECT * FROM angajati WHERE salariul IN ( SELECT MIN(salariul) FROM angajati WHERE id_departament IN (30, 50, 80) GROUP BY id_departament )",
+    "explanation": "Subquery computes minimum salary per specified department. WHERE IN selects employees matching those values."
+  },
+  {
+    "id": 36,
+    "category": "Views",
+    "request": "Create a view that contains only the orders from the current month.",
+    "sql": "CREATE OR REPLACE VIEW v_comenzi_lunar AS SELECT * FROM comenzi WHERE EXTRACT(MONTH FROM data) = EXTRACT(MONTH FROM SYSDATE)",
+    "explanation": "The view filters orders using date extraction in the WHERE clause."
+  },
+  {
+    "id": 37,
+    "category": "Views",
+    "request": "Update all orders from the current month by setting their order status to 10.",
+    "sql": "UPDATE v_comenzi_lunar SET stare_comanda = 10",
+    "explanation": "UPDATE modifies rows in the view, which propagates to the base table."
+  },
+  {
+    "id": 38,
+    "category": "Views",
+    "request": "Create a view that shows the employee name, salary, and number of orders handled in December, regardless of the year.",
+    "sql": "CREATE OR REPLACE VIEW v_comenzi_angajati AS SELECT a.nume, a.salariul, COUNT(c.id_comanda) AS numar_comenzi FROM angajati a JOIN comenzi c ON a.id_angajat = c.id_angajat WHERE EXTRACT(MONTH FROM c.data) = 12 GROUP BY a.nume, a.salariul",
+    "explanation": "JOIN combines employees and orders. WHERE filters December. GROUP BY Aggregations order counts."
+  },
+  {
+    "id": 39,
+    "category": "Views",
+    "request": "Calculate a 10% bonus for the employees based on the December orders view.",
+    "sql": "SELECT nume, salariul, numar_comenzi, salariul * 0.1 AS bonus FROM v_comenzi_angajati",
+    "explanation": "SELECT computes a derived column using arithmetic on salary."
+  },
+  {
+    "id": 40,
+    "category": "Views",
+    "request": "Create a view showing employees who handled orders at least two years ago, including order id and date.",
+    "sql": "CREATE OR REPLACE VIEW v_comenzi_angajati_1 AS SELECT a.nume, a.salariul, c.id_comanda, c.data FROM angajati a JOIN comenzi c ON a.id_angajat = c.id_angajat WHERE EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM c.data) > 2",
+    "explanation": "JOIN links employees with orders. WHERE filters by historical condition."
+  },
+  {
+    "id": 41,  
+    "category": "Aggregations",
+    "request": "Display the total order value for each product ordered at least one year ago, grouped by product and date, and only include products whose total ordered quantity is greater than 100.",
+    "sql": "SELECT p.denumire_produs, c.data, SUM(r.cantitate * r.pret) AS valoare_totala FROM produse p JOIN rand_comenzi r ON p.id_produs = r.id_produs JOIN comenzi c ON r.id_comanda = c.id_comanda WHERE EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM c.data) >= 1 GROUP BY p.denumire_produs, c.data HAVING SUM(r.cantitate) > 100",
+    "explanation": "JOIN combines products, order rows, and orders. WHERE filters by year. GROUP BY produces subtotals. HAVING filters by quantity."
+  },
+  {
+    "id": 42,
+    "category": "Aggregations",
+    "request": "Display the total order value for each product ordered at least one year ago, without date subtotals, and only include products whose total ordered quantity is greater than 100.",
+    "sql": "SELECT p.denumire_produs, SUM(r.cantitate * r.pret) AS valoare_totala FROM produse p JOIN rand_comenzi r ON p.id_produs = r.id_produs JOIN comenzi c ON r.id_comanda = c.id_comanda WHERE EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM c.data) >= 1 GROUP BY p.denumire_produs HAVING SUM(r.cantitate) > 100",
+    "explanation": "Similar to the previous query but grouped only by product, producing overall totals without date subtotals."
+  }
+]
