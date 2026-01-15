@@ -151,8 +151,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-connection = get_oracle_connection()
-
 with st.expander("Schema image", expanded=False):
     schema_path = SQL_DIR / "schemaBD.png"
     if schema_path.exists():
@@ -190,6 +188,8 @@ run_example = st.button("Run SQL", type="primary")
 
 if run_example:
     try:
+        with st.spinner("Connecting to Oracle..."):
+            connection = get_oracle_connection()
         result = run_query(sql_text, connection)
         if result is None:
             st.success("Statement executed.")
